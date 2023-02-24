@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <string.h>
+
+#define MAX_ARGS 16
 
 int main(void)
 {
@@ -20,6 +23,17 @@ int main(void)
 		//remove newline character from user input
 		command[strcspn(command, "\n")] = "\0";
 
+		int i = 0;
+		char *token = strtok(command, " ");
+
+		while (token != NULL && i < MAX_ARGS -1)
+		{
+			args[i]= token;
+			token =strtok(NULL, " ");
+			i++
+		}
+		args[i] = NULL;
+
 		pid_t pid = fork();
 		if (pid < 0)
 		{
@@ -29,9 +43,9 @@ int main(void)
 		else if (pid == 0)
 		{
 			//child process
-			execlp(command , command, (char *) NULL);
-			//if execclp returns there was an error
-			fprintf(stderr, "%s: command not found\n", command);
+			execvp(args[0] , args);
+			//if execvp returns there was an error
+			fprintf(stderr, "%s: command not found\n", args[0]);
 			exit(1);
 		}
 		else
